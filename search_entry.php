@@ -1,86 +1,52 @@
 <?php
 require_once 'login.php';
+require_once 'functions.php';
 $db_server = mysql_connect($db_hostname, $db_username, $db_password);
 if (!$db_server) die("Unable to connect to MySQL: " . mysql_error());
 mysql_select_db($db_database)
 	or die("Unable to select database: " . mysql_error());
-// LIst out parent name
-$query = "SELECT * FROM master_name";
-$result = mysql_query($query);
-if (!$result) die ("Database access failed: " . mysql_error());
-$rows = mysql_num_rows($result);
-
-echo "<table><tr> <th>Id</th> <th>First Name</th>
-	<th>Last Name</th></tr>";
-for ($j = 0 ; $j < $rows ; ++$j)
-{
-	$row = mysql_fetch_row($result);
-	echo "<tr>";
-	for ($k = 0 ; $k < 4 ; ++$k) echo "<td>$row[$k]</td>";
-	echo "</tr>";
+// Search Customer by Last name
+if ($_SERVER['REQUEST_METHOD'] ==  "POST"){
+  if ($_POST['search_name']){
+    $search_name = sanitizeMySQL($_POST['search_name']);
+    $search_name = $search_name . "%";
+    $result = mysql_query("SELECT id, L_name
+                          FROM master_name
+                          WHERE L_name
+                          LIKE '$search_name'") or die ("Issue selecting rows - " . mysql_error());
+    echo "<table><tr><th>Last Name</th><th>VIEW</th><th>EDIT</th></tr>";
+    while ($line = mysql_query($result)) {
+      echo "<tr>";
+      echo "<td><a href=" . $_SERVER['search_entry.php'] . "?id=" . $line['id'] . "&mode=view>VIEW</a></td>";
+      echo "<td><a href=" . $_SERVER['edit_entry.php'] . "?id=" .$line['id'] . "&mode=edit>EDIT</a></td>";
+      echo "</tr>";
+    }
+    echo "</table>";
+  }
 }
-echo "</table>";
-// LIst out Sibling table
-$query = "SELECT * FROM sibling";
-$result = mysql_query($query);
-if (!$result) die ("Database access failed: " . mysql_error());
-$rows = mysql_num_rows($result);
-echo "<table><tr> <th>Id</th> <th>masterID</th>
-	<th>Child1</th><th>Child2</th><th>Child3</th><th>Subdivision</th></tr>";
-for ($j = 0 ; $j < $rows ; ++$j)
-{
-	$row = mysql_fetch_row($result);
-	echo "<tr>";
-	for ($k = 0 ; $k < 6 ; ++$k) echo "<td>$row[$k]</td>";
-	echo "</tr>";
+if (isset($_GET['mode']) && !empty($_GET['mode'])){
+  $id = $_GET[id];
+  switch ($_GET['mode']){
+    case 'view': {
+      $get_name = mysql_query("SELECT * FROM master_name
+                              WHERE master_name.id=$id") or die ("Issue selecting rows - " . mysql_error());
+      $row = mysql_num_rows($get_name);
+      echo "Showing Record of : ";
+      while ($line = mysql_fetch_assoc($get_name)){
+        echo $line["address1"] . " " . $line["address2"] . "<br /> ";
+        echo $line["city"] . " " . $line['state'] . ", " . $line['zipcode'] . "<br />";
+        echo "Address Type : " . $line['type'] . "<br />";
+      }
+      $get_address = mysql_query("SELECT * FROM address WHERE address.master_id=$id");
+    }
+  }
 }
-echo "</table>";
-// List out Address table
-$query = "SELECT * FROM address";
-$result = mysql_query($query);
-if (!$result) die ("Database access failed: " . mysql_error());
-$rows = mysql_num_rows($result);
-echo "<table><tr> <th>Id</th> <th>masterID</th>
-	<th>address</th><th>Mail Stop</th><th>City</th><th>State</th><th>Zipcode</th><Type</th></tr>";
-for ($j = 0 ; $j < $rows ; ++$j)
-{
-	$row = mysql_fetch_row($result);
-	echo "<tr>";
-	for ($k = 0 ; $k < 7 ; ++$k) echo "<td>$row[$k]</td>";
-	echo "</tr>";
-}
-echo "</table>";
-// LIst out Telephone table
-$query = "SELECT * FROM telephone";
-$result = mysql_query($query);
-if (!$result) die ("Database access failed: " . mysql_error());
-$rows = mysql_num_rows($result);
-echo "<table><tr> <th>Id</th> <th>masterID</th>
-	<th>home</th><th>work</th><th>cell</th><th>fax</th></tr>";
-for ($j = 0 ; $j < $rows ; ++$j)
-{
-	$row = mysql_fetch_row($result);
-	echo "<tr>";
-	for ($k = 0 ; $k < 6 ; ++$k) echo "<td>$row[$k]</td>";
-	echo "</tr>";
-}
-echo "</table>";
-// LIst out EMail table
-$query = "SELECT * FROM email";
-$result = mysql_query($query);
-if (!$result) die ("Database access failed: " . mysql_error());
-$rows = mysql_num_rows($result);
-echo "<table><tr> <th>Id</th> <th>masterID</th>
-	<th>home</th><th>work</th></tr>";
-for ($j = 0 ; $j < $rows ; ++$j)
-{
-	$row = mysql_fetch_row($result);
-	echo "<tr>";
-	for ($k = 0 ; $k < 4 ; ++$k) echo "<td>$row[$k]</td>";
-	echo "</tr>";
-}
-echo "</table>";
 echo <<<_END
+<form action="search_entry.php" method="post">$error
+<p><strong>Search by Last name only</strong></p>
+Search <input type='text' size="20" maxlength='50' name='search_name' value='$search_name' /><br />
+<input type='submit' value='Search' />
+</form>
 <ul>
     <li><a href="add_entry.php">Add a Customer</a></li>
     <li><a href="delete_entry.php">Delete a Customer</a></li>
