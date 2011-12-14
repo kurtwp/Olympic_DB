@@ -15,10 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] ==  "POST"){
                           WHERE L_name
                           LIKE '$search_name'") or die ("Issue selecting rows - " . mysql_error());
     echo "<table><tr><th>Last Name</th><th>VIEW</th><th>EDIT</th></tr>";
-    while ($line = mysql_query($result)) {
+    while ($line = mysql_fetch_assoc($result)) {
       echo "<tr>";
+      echo "<td>$line[L_name]</td>";
       echo "<td><a href=" . $_SERVER['search_entry.php'] . "?id=" . $line['id'] . "&mode=view>VIEW</a></td>";
-      echo "<td><a href=" . $_SERVER['edit_entry.php'] . "?id=" .$line['id'] . "&mode=edit>EDIT</a></td>";
+      echo "<td><a href=" . $_SERVER['search_entry.php'] . "?id=" .$line['id'] . "&mode=edit>EDIT</a></td>";
       echo "</tr>";
     }
     echo "</table>";
@@ -33,14 +34,56 @@ if (isset($_GET['mode']) && !empty($_GET['mode'])){
       $row = mysql_num_rows($get_name);
       echo "Showing Record of : ";
       while ($line = mysql_fetch_assoc($get_name)){
-        echo $line["address1"] . " " . $line["address2"] . "<br /> ";
-        echo $line["city"] . " " . $line['state'] . ", " . $line['zipcode'] . "<br />";
-        echo "Address Type : " . $line['type'] . "<br />";
+        echo $line["f_name"] . " " . $line["L_name"] . "<br /> ";
       }
       $get_address = mysql_query("SELECT * FROM address WHERE address.master_id=$id");
-    }
-  }
-}
+      $rows = mysql_num_rows($get_address);
+      if ($rows > 0){
+        while ($line = mysql_fetch_assoc($get_address)) {
+          echo $line["address1"] . " " . $line["address2"] . "<br /> ";
+          echo $line["city"] . " " . $line['state'] . ", " . $line['zipcode'] . "<br />";
+          echo "Address Type : " . $line['type'] . "<br />";
+        }
+      } else {
+        echo "Has no address - UPDATE <br />";
+      }
+      $get_telephone = mysql_query("SELECT * FROM telephone WHERE telephone.master_id=$id");
+      $rows = mysql_num_rows($get_telephone);
+      if ($rows > 0) {
+        while ($line = mysql_fetch_assoc($get_telephone)){
+          echo "HOME : " . $line['home'] . "<br /> ";
+          echo "WORK : " . $line['work'] . "<br /> ";
+          echo "CELL : " . $line['cell'] . "<br /> ";
+          } 
+      } else {
+        echo "Has no Telephone numbers - UPDATE <br />";
+      }
+      $get_sibling = mysql_query("SELECT * FROM sibling WHERE sibling.master_id=$id");
+      $rows = mysql_num_rows($get_sibling);
+      if ($rows > 0){
+        while ($line = mysql_fetch_assoc($get_sibling)){
+          echo "Child 1: " . $line["sibling1"] . "<br /> ";
+          echo "Child 2: " . $line["sibling2"] . "<br /> ";
+          echo "Child 3: " . $line['sibling3'] . "<br /> ";
+          echo "Subdivision : " . $line['subdivision'] . "<br />";
+        } 
+      } else {
+        echo "Has no children - UPDATE <br />";
+      }
+      $get_email = mysql_query("SELECT * FROM email WHERE email.master_id=$id");
+      $rows = mysql_num_rows($get_email);
+      if ($rows > 0) {
+        while ($line = mysql_fetch_assoc($get_email)){
+          echo "HOME: " . $line["home"] . "<br /> ";
+          echo "WORK: " . $line["work"] . "<br /> ";
+        } 
+      } else {
+        echo "has no emails - UPDATE <br />";
+      }
+      break;
+      } // End View
+  } // End Switch
+} // End isset if
 echo <<<_END
 <form action="search_entry.php" method="post">$error
 <p><strong>Search by Last name only</strong></p>
