@@ -1,10 +1,7 @@
 <?php
-require_once 'login.php';
 require_once 'functions.php';
-$db_server = mysql_connect($db_hostname, $db_username, $db_password);
-if (!$db_server) die("Unable to connect to MySQL: " . mysql_error());
-mysql_select_db($db_database)
-	or die("Unable to select database: " . mysql_error());
+require_once 'db_connect.php';
+$search_name = "";
 // Search Customer by Last name
 if ($_SERVER['REQUEST_METHOD'] ==  "POST"){
   if ($_POST['search_name']){
@@ -14,21 +11,27 @@ if ($_SERVER['REQUEST_METHOD'] ==  "POST"){
                           FROM master_name
                           WHERE L_name
                           LIKE '$search_name'") or die ("Issue selecting rows - " . mysql_error());
-    echo "<table><tr><th>Last Name</th><th>VIEW</th><th>EDIT</th></tr>";
-    while ($line = mysql_fetch_assoc($result)) {
-      echo "<tr>";
-      echo "<td>$line[L_name]</td>";
-      echo "<td><a href=" . $_SERVER['search_entry.php'] . "?id=" . $line['id'] . "&mode=view>VIEW</a></td>";
-      echo "<td><a href=" . $_SERVER['search_entry.php'] . "?id=" .$line['id'] . "&mode=edit>EDIT</a></td>";
-      echo "</tr>";
+    $row = mysql_num_rows($result);
+    if ($row > 0) {
+      echo "<table><tr><th>Last Name</th><th>VIEW</th><th>EDIT</th></tr>";
+      while ($line = mysql_fetch_assoc($result)) {
+        echo "<tr>";
+        echo "<td>$line[L_name]</td>";
+        echo "<td><a href=" . $_SERVER['PHP_SELF'] . "?id=" . $line['id'] . "&mode=view>VIEW</a></td>";
+        echo "<td><a href=" . $_SERVER['PHP_SELF'] . "?id=" . $line['id'] . "&mode=edit>EDIT</a></td>";
+        echo "</tr>";
+      }
+      echo "</table>";
+    } else {
+      echo "No record found<br />";
     }
-    echo "</table>";
   }
 }
+// Check to make sure MODE is set and not empty
 if (isset($_GET['mode']) && !empty($_GET['mode'])){
-  $id = $_GET[id];
-  switch ($_GET['mode']){
-    case 'view': {
+  $id = $_GET['id'];
+// View customer information
+  if ($_GET['mode'] == "view"){
       $get_name = mysql_query("SELECT * FROM master_name
                               WHERE master_name.id=$id") or die ("Issue selecting rows - " . mysql_error());
       $row = mysql_num_rows($get_name);
@@ -44,9 +47,7 @@ if (isset($_GET['mode']) && !empty($_GET['mode'])){
           echo $line["city"] . " " . $line['state'] . ", " . $line['zipcode'] . "<br />";
           echo "Address Type : " . $line['type'] . "<br />";
         }
-      } else {
-        echo "Has no address - UPDATE <br />";
-      }
+      } 
       $get_telephone = mysql_query("SELECT * FROM telephone WHERE telephone.master_id=$id");
       $rows = mysql_num_rows($get_telephone);
       if ($rows > 0) {
@@ -55,9 +56,7 @@ if (isset($_GET['mode']) && !empty($_GET['mode'])){
           echo "WORK : " . $line['work'] . "<br /> ";
           echo "CELL : " . $line['cell'] . "<br /> ";
           } 
-      } else {
-        echo "Has no Telephone numbers - UPDATE <br />";
-      }
+      } 
       $get_sibling = mysql_query("SELECT * FROM sibling WHERE sibling.master_id=$id");
       $rows = mysql_num_rows($get_sibling);
       if ($rows > 0){
@@ -67,9 +66,7 @@ if (isset($_GET['mode']) && !empty($_GET['mode'])){
           echo "Child 3: " . $line['sibling3'] . "<br /> ";
           echo "Subdivision : " . $line['subdivision'] . "<br />";
         } 
-      } else {
-        echo "Has no children - UPDATE <br />";
-      }
+      } 
       $get_email = mysql_query("SELECT * FROM email WHERE email.master_id=$id");
       $rows = mysql_num_rows($get_email);
       if ($rows > 0) {
@@ -77,15 +74,20 @@ if (isset($_GET['mode']) && !empty($_GET['mode'])){
           echo "HOME: " . $line["home"] . "<br /> ";
           echo "WORK: " . $line["work"] . "<br /> ";
         } 
-      } else {
-        echo "has no emails - UPDATE <br />";
       }
-      break;
-      } // End View
-  } // End Switch
+      echo "Do you want to update this record<br />";
+	  echo "<a href=" . $_SERVER['PHP_SELF'] . "?id=" . $id . "&mode=edit>UPDATE</a>";
+  } // End if view
+// Redirected to edit_entry.php to edit/update customer information
+  if ($_GET['mode'] == "edit") {
+        session_start();
+        $_SESSION['id'] = $id;
+        header('Location: edit_entry.php');
+        exit;
+      }// End if edit*/
 } // End isset if
 echo <<<_END
-<form action="search_entry.php" method="post">$error
+<form action="search_entry.php" method="post">
 <p><strong>Search by Last name only</strong></p>
 Search <input type='text' size="20" maxlength='50' name='search_name' value='$search_name' /><br />
 <input type='submit' value='Search' />
