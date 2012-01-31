@@ -1,8 +1,24 @@
 <?php
 header("Cache-Control: no-cache, must-revalidate");
-
 require_once 'functions.php';
-include 'db_connect.php';
+require_once 'db_connect.php';
+$f_name = "";
+$l_name = "";
+$sibling1 = "";
+$sibling2 = "";
+$sibling3 = "";
+$address1 = "";
+$address2 ="";
+$city = "";
+$state = "";
+$zipcode = "";
+$thome = "";
+$twork = "";
+$cell = "";
+$fax = "";
+$ehome = "";
+$ework  ="";
+
 if($_SERVER['REQUEST_METHOD'] == "POST") {
 //****************************************
 // Check Customer Name Entry
@@ -135,7 +151,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
   }
 } 
 echo <<<_END
-<form action="add_entry.php" method="post">$error
+<form action="add_entry.php" method="post">
 <p><strong>Parent Name</strong></p>
 First Name <input type='text' size="20" maxlength='50' name='f_name' value='$f_name' /><br />
 Last Name <input type='text' size="25" maxlength='50' name='l_name' value='$l_name' /><br />
