@@ -2,11 +2,15 @@
 require_once 'functions.php';
 require_once 'db_connect.php';
 $search_name = "";
+$edit_id = 0;
+$home = "";
 // Search Customer by Last name
 if ($_SERVER['REQUEST_METHOD'] ==  "POST"){
   if ($_POST['search_name']){
     $search_name = sanitizeMySQL($_POST['search_name']);
-    $search_name = $search_name . "%";
+    $search_name = $search_name;if ($_SERVER['REQUEST_METHOD'] == "POST") {
+  $id = $edit_id;
+}
     $result = mysql_query("SELECT id, L_name
                           FROM master_name
                           WHERE L_name
