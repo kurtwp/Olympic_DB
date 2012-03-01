@@ -105,15 +105,13 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
 // $sibling1 = First child
 // $sibling2 = Second child
 // $sibling3 = Thrid child
-// $subdivision = The development the are picked up in
 //*********************************************************
   if ($_POST['sibling1']) $sibling1 = sanitizeMySQL($_POST['sibling1']);
   if ($_POST['sibling2']) $sibling2 = sanitizeMySQL($_POST['sibling2']);
   if ($_POST['sibling3']) $sibling3 = sanitizeMySQL($_POST['sibling3']);
-  if ($_POST['subdivision']) $subdivision = sanitizeMySQL($_POST['subdivision']);
   if (!empty($sibling1))
   {
-    $query = "INSERT INTO sibling VALUES(NULL,'$masterID','$sibling1','$sibling2','$sibling3','$subdivision')";
+    $query = "INSERT INTO sibling VALUES(NULL,'$masterID','$sibling1','$sibling2','$sibling3')";
     $results = mysql_query($query);
     if (!$results) die ("Database access failed: " . mysql_error());
   }
@@ -159,12 +157,6 @@ Last Name <input type='text' size="25" maxlength='50' name='l_name' value='$l_na
 Child1<input type='text' size="20" maxlength='30' name='sibling1' value='$sibling1' /><br />
 Child2<input type='text' size="20" maxlength='30' name='sibling2' value='$sibling2' /><br />
 Child3<input type='text' size="20" maxlength='30' name='sibling3' value='$sibling3' /><br />
-Subdivision<select name="subdivision" size="1">
-<option selected="selected" value="other">Other</option>
-<option value="sub1">Sub1</option>
-<option value="sub2">Sub2</option>
-<option value="sub3">Sub3</option>
-</select>
 <p><strong>Customer Address</strong></p>
 Street Address <input type='text' maxlength='50' name='address1' value='$address1' /><br />
 Address <input type='text' maxlength='50' name='address2' value='$address2' /><br />
