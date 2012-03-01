@@ -46,7 +46,6 @@ $query = "CREATE TABLE sibling (
 			sibling1 VARCHAR(32),
 			sibling2 VARCHAR(32),
             sibling3 VARCHAR(32),
-            subdivision VARCHAR(75),
             PRIMARY KEY (id)
 		)";
 
