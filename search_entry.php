@@ -59,6 +59,7 @@ if (isset($_GET['mode']) && !empty($_GET['mode'])){
           echo "HOME : " . $line['home'] . "<br /> ";
           echo "WORK : " . $line['work'] . "<br /> ";
           echo "CELL : " . $line['cell'] . "<br /> ";
+          echo " FAX : " . $line['fax'] . "<br />";
           } 
       } 
       $get_sibling = mysql_query("SELECT * FROM sibling WHERE sibling.master_id=$id");
