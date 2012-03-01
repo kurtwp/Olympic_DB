@@ -68,7 +68,6 @@ if (isset($_GET['mode']) && !empty($_GET['mode'])){
           echo "Child 1: " . $line["sibling1"] . "<br /> ";
           echo "Child 2: " . $line["sibling2"] . "<br /> ";
           echo "Child 3: " . $line['sibling3'] . "<br /> ";
-          echo "Subdivision : " . $line['subdivision'] . "<br />";
         } 
       } 
       $get_email = mysql_query("SELECT * FROM email WHERE email.master_id=$id");
