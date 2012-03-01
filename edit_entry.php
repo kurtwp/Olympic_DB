@@ -11,34 +11,56 @@ $get_name = mysql_query("SELECT *
                           WHERE master_name.id=$edit_id") or die ("Issue selecting rows - " . mysql_error());
 $line = mysql_fetch_array($get_name);
 echo $line["f_name"] . " " . $line["L_name"] . "<br /> ";
+// ****** Customer Address information ************
+$get_address = mysql_query("SELECT *
+                           FROM address
+                           WHERE address.master_id=$edit_id");
+$address = mysql_fetch_array($get_address);
 // ****** Get Email information *******************
-$get_email = mysql_query ("SELECT email.home, email.work
+$get_email = mysql_query ("SELECT *
                                 FROM email
                                 WHERE email.master_id=$edit_id");
-$line = mysql_fetch_array($get_email);
+$email = mysql_fetch_array($get_email);
 echo "<br />";
 // ****** Get Siblings information **********
-$get_sibling = mysql_query("SELECT sibling.sibling1,sibling.sibling2,sibling.sibling3
+$get_sibling = mysql_query("SELECT *
                            FROM sibling
                            WHERE sibling.master_id=$edit_id");
 $sib = mysql_fetch_array($get_sibling);
 // ************ Start of Edit *************** 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
+// ************ Start of Address edit *******
+  if ($_POST['eaddress1']) $address['eaddress1'] = sanitizeMySQL($_POST['eaddress1']);
+  if ($_POST['eaddress2']) $address['eaddress2'] = sanitizeMySQL($_POST['eaddress2']);
+  if ($_POST['ecity']) $address['ecity'] = sanitizeMySQL($_POST['ecity']);
+  if ($_POST['estate']) $address['estate'] = sanitizeMySQL($_POST['estate']);
+  if ($_POST['ezipcode']) $address['ezipcode'] = sanitizeMySQL($_POST['ezipcode']);
+  $table = "address";
+  if (match_column($table, $edit_id)){
+    $result = mysql_query("UPDATE address
+                          SET address1='$address[eaddress1]', address2='$address[eaddress2]', city='$address[ecity]', state='$address[estate]', zipcode='$address[ezipcode]'
+                          WHERE master_id=$edit_id");
+    if (!$result) die ("Database access failed: " . mysql_error());
+  } else {
+    $result = mysql_query("INSERT INTO address (master_id, address1, address2, city, state, zipcode)
+                          VALUES ('$edit_id', '$address[eaddress1]', '$address[eaddress2]', '$address[ecity]', '$address[estate]', '$address[zipcode]')");
+    if (!$result) die ("MySQL query access failed: " . mysql_error());
+  }
 // ************ Start of EMail edit ********* 
   if ($_POST['ehome'] || $_POST['ework']) {
     $table="email";
     if (match_column($table, $edit_id)) {
-      $line['ehome'] = sanitizeMySQL($_POST['ehome']);
-      $line['ework'] = sanitizeMySQL($_POST['ework']);
+      $email['ehome'] = sanitizeMySQL($_POST['ehome']);
+      $email['ework'] = sanitizeMySQL($_POST['ework']);
       $result = mysql_query("UPDATE email
-                          SET home='$line[ehome]', work='$line[ework]'
+                          SET home='$email[ehome]', work='$email[ework]'
                           WHERE master_id=$edit_id");
       if (!$result) die ("Database access failed: " . mysql_error());
     } else {
-      $line['ehome'] = sanitizeMySQL($_POST['ehome']);
-      $line['ework'] = sanitizeMySQL($_POST['ework']);
+      $email['ehome'] = sanitizeMySQL($_POST['ehome']);
+      $email['ework'] = sanitizeMySQL($_POST['ework']);
       $result = mysql_query("INSERT INTO email (master_id, home, work)
-                            VALUES ('$edit_id','$line[ehome]','$line[ework]')");
+                            VALUES ('$edit_id','$email[ehome]','$email[ework]')");
       if (!$result) die ("MySQL query access failed: " . mysql_error());
     }
   } elseif (!$_POST['ehome'] && !$_POST['ework']) {
@@ -51,31 +73,43 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
   if ($_POST['esibling1']) $sib['esibling1'] = sanitizeMySQL($_POST['esibling1']);
   if ($_POST['esibling2']) $sib['esibling2'] = sanitizeMySQL($_POST['esibling2']);
   if ($_POST['esibling3']) $sib['esibling3'] = sanitizeMySQL($_POST['esibling3']);
-  if ($_POST['subdivision']) $subdivision = sanitizeMySQL($_POST['subdivision']);
   $table = "sibling";
+  if (!$_POST['esibling1'] && !$_POST['esibling2'] && !$_POST['esibling3']) {
+    $result = mysql_query("DELETE FROM sibling
+                          WHERE master_id=$edit_id");
+  } elseif (match_column($table, $edit_id)) {
   $result = mysql_query("UPDATE sibling
-                          SET sibling1='$sib[esibling1]',sibling2='$sib[esibling2]',sibling3='$sib[esibling3]',subdivision='$subdivision'
+                          SET sibling1='$sib[esibling1]',sibling2='$sib[esibling2]',sibling3='$sib[esibling3]'
                           WHERE master_id=$edit_id");
       if (!$result) die ("Database access failed: " . mysql_error());
+  } else {
+    echo "IN INSERT <br />";
+    $result = mysql_query("INSERT INTO sibling (master_id, sibling1, sibling2, sibling3, subdivision)
+                            VALUES ('$edit_id','$sib[esibling1]','$sib[esibling2]','$sib[esibling3]')");
+      if (!$result) die ("MySQL query access failed: " . mysql_error());
+  }
   session_start();
         $_SESSION['id'] = $edit_id;
   header('Location: view_entry.php');
   exit;
 }
+
 echo <<<_END
 <form name="form" action="edit_entry.php" method="post">
-  Home: <input type='text' size='30' maxlength='25' name='ehome' value='$line[home]' /><br />
-  Work: <input type='text' size='30' maxlength='25' name='ework' value='$line[work]' /><br />
+<p><strong>Customer Address</strong></p>
+Street Address <input type='text' maxlength='50' name='eaddress1' value='$address[address1]' /><br />
+Address <input type='text' maxlength='50' name='eaddress2' value='$address[address2]' /><br />
+City/State/Zipcode <br />
+<input type='text' size='25' maxlength='30' name='ecity' value='$address[city]' />
+<input type='text' size='5' maxlength=,2' name='estate' value='$address[state]' />
+<input type='text' size='10' maxlength='10' name='ezipcode' value='$address[zipcode]' /><br />
+  <p><strong>Email</strong></p>
+  Home: <input type='text' size='30' maxlength='25' name='ehome' value='$email[home]' /><br />
+  Work: <input type='text' size='30' maxlength='25' name='ework' value='$email[work]' /><br />
   <p><strong>Child Names</strong></p>
   Child1: <input type='text' size="20" maxlength='30' name='esibling1' value='$sib[sibling1]' /><br />
   Child2: <input type='text' size="20" maxlength='30' name='esibling2' value='$sib[sibling2]' /><br />
   Child3: <input type='text' size="20" maxlength='30' name='esibling3' value='$sib[sibling3]' /><br />
-  Subdivision: <select name="subdivision" size="1">
-  <option selected="selected" value="other">Other</option>
-  <option value="sub1">Sub1</option>
-  <option value="sub2">Sub2</option>
-  <option value="sub3">Sub3</option>
-</select>
   <input type='submit' value = 'Submit'>
 <br />
 </form>
