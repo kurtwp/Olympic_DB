@@ -40,14 +40,38 @@ mysql_select_db($db_database)
 			work VARCHAR(150),
             PRIMARY KEY (id)
 		)";*/
-$query = "CREATE TABLE sibling (
+/* $query = "CREATE TABLE sibling (
 			id INT NOT NULL AUTO_INCREMENT,
             master_id INT NOT NULL,
 			sibling1 VARCHAR(32),
 			sibling2 VARCHAR(32),
             sibling3 VARCHAR(32),
             PRIMARY KEY (id)
-		)";
+		)"; */
+/* $query = "CREATE TABLE pickdrop (
+			id INT NOT NULL AUTO_INCREMENT,
+			pickdrop VARCHAR(25),
+            PRIMARY KEY (id)
+		)"; */ 
+/* $query = "CREATE TABLE location (
+			id INT NOT NULL AUTO_INCREMENT,
+            master_id INT NOT NULL,
+			pickup INT,
+            dropoff INT,
+            PRIMARY KEY (id)
+		)"; */
+/* $query = "CREATE TABLE  notestext (
+			id INT NOT NULL AUTO_INCREMENT,
+            master_id INT NOT NULL,
+            notetext TEXT,
+            PRIMARY KEY (id)
+		)"; */
+$query = "CREATE TABLE notesdt (
+          id INT NOT NULL,
+          master_id INT NOT NULL,
+          date DATE,
+          time TIME
+          )";
 
 $result = mysql_query($query);
 if (!$result) die ("Database access failed: " . mysql_error());
