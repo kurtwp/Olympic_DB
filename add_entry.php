@@ -1,9 +1,15 @@
 <?php
+require_once 'header.html';
 header("Cache-Control: no-cache, must-revalidate");
 require_once 'functions.php';
 require_once 'db_connect.php';
 $f_name = "";
 $l_name = "";
+$sf_name = "";
+$sl_name = "";
+$ef_name = "";
+$el_name = "";
+$ephone = "";
 $sibling1 = "";
 $sibling2 = "";
 $sibling3 = "";
@@ -18,6 +24,8 @@ $cell = "";
 $fax = "";
 $ehome = "";
 $ework  ="";
+$notes = "";
+$notesdt_id = "";
 
 if($_SERVER['REQUEST_METHOD'] == "POST") {
 //****************************************
@@ -92,11 +100,9 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
   {
     echo "Please enter a zip code";
   }
-  if ($_POST['add_type']) $add_type = sanitizeMySQL($_POST['add_type']);
-
   if (!empty($address1) && !empty($city) && !empty($zipcode) )
   {
-    $query = "INSERT INTO address VALUES(NULL,'$masterID','$address1','$address2','$city','$state','$zipcode','$add_type')";
+    $query = "INSERT INTO address VALUES(NULL,'$masterID','$address1','$address2','$city','$state','$zipcode')";
     $results = mysql_query($query);
     if (!$results) die ("Database access failed: " . mysql_error());
   }
@@ -147,42 +153,156 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
   {
     echo "need at least one Telephone number";
   }
+  if ($_POST['pick']) $pick = sanitizeMySQL($_POST['pick']);
+  if ($_POST['drop']) $drop = sanitizeMySQL($_POST['drop']);
+  if (!empty($pick) || !empty($drop)) {
+    $query = "INSERT INTO location
+    VALUES(NULL, '$masterID','$pick','$drop')";
+    $results = mysql_query($query);
+    if (!$results) die ("Database access failed: " . mysql_error());
+  }
+  if ($_POST['notes']) $notes = sanitizeMySQL($_POST['notes']); {
+    $query = "INSERT INTO notestext VALUES(NULL, '$masterID','$notes')";
+    $results = mysql_query($query);
+    $notes_id = mysql_insert_id();
+    if (!$results) die ("Database access failed: " . mysql_error());
+    $query = "INSERT INTO notesdt (id, master_id, date, time)
+    VALUES ('$notes_id','$masterID', NOW(), CURTIME() )";
+    $results = mysql_query($query);
+    if (!$results) die ("Database access failed: " . mysql_error());
+  }
+ 
+session_start();
+        $_SESSION['id'] = $masterID;
+  header('Location: view_entry.php');
+  exit; 
 } 
 echo <<<_END
-<form action="add_entry.php" method="post">
-<p><strong>Parent Name</strong></p>
-First Name <input type='text' size="20" maxlength='50' name='f_name' value='$f_name' /><br />
-Last Name <input type='text' size="25" maxlength='50' name='l_name' value='$l_name' /><br />
-<p><strong>Child Names</strong></p>
-Child1<input type='text' size="20" maxlength='30' name='sibling1' value='$sibling1' /><br />
-Child2<input type='text' size="20" maxlength='30' name='sibling2' value='$sibling2' /><br />
-Child3<input type='text' size="20" maxlength='30' name='sibling3' value='$sibling3' /><br />
-<p><strong>Customer Address</strong></p>
-Street Address <input type='text' maxlength='50' name='address1' value='$address1' /><br />
-Address <input type='text' maxlength='50' name='address2' value='$address2' /><br />
-City/State/Zipcode <br />
-<input type='text' size='25' maxlength='30' name='city' value='$city' />
-<input type='text' size='5' maxlength=,2' name='state' value='$state' />
-<input type='text' size='10' maxlength='10' name='zipcode' value='$zipcode' /><br />
-Address Type:
-HOME<input type="radio" name="add_type" value="home" checked="checked"/>
-WORK<input type="radio" name="add_type" value="work" />
-OTHER<input type="radio" name="add_type" value="other" /><p></p>
-<p><strong> Customer Telephone Numbers</strong> </p>
-Work<input type='text' size='30' maxlength='25' name='twork' value='$twork' /><br />
-Home<input type='text' size='30' maxlength=,25' name='thome' value='$thome' /><br />
-Cell<input type='text' size='30' maxlength='25' name='cell' value='$cell' /><br />
-Fax<input type='text' size='30' maxlength='25' name='fax' value='$fax' /><br />
-<p><strong> Customer EMail Addresses</strong> </p>
-Work<input type='text' size='30' maxlength='25' name='ework' value='$ework' /><br />
-Home<input type='text' size='30' maxlength=,25' name='ehome' value='$ehome' /><br />
-<input type='submit' value='Add' />
-</form><br />
-<ul>
-    <li><a href="add_entry.php">Add another Customer</a></li>
-    <li><a href="delete_entry.php">Delete a Customer</a></li>
-    <li><a href="search_entry.php">Search a Customer</a></li>
-</ul>
-
+<form action="table.php" method="post">
+<table>
+ <table>
+   <tr>
+      <th colspan="2"> Parent Name </th><th colspan="2"> Spouses Name </th><th colspan="2"> Emergency Contact </th>
+   </tr>
+   <tr>
+      <td><label for="f_name">First Name: </label></td>
+      <td><input type='text' size="20" maxlength='50' id="f_name" name='f_name' value='$f_name' /></td>
+      <td><label for="sf_name">First Name: </label></td>
+      <td><input type='text' size="20" maxlength='50' id="sf_name" name='sf_name' value='$sf_name' /></td>
+      <td><label for="ef_name">First Name: </label></td>
+      <td><input type='text' size="20" maxlength='50' id="ef_name" name='ef_name' value='$ef_name' /></td>
+   </tr>
+   <tr>
+      <td><label for="l_name">Last Name: </label></td>
+      <td><input type='text' size="20" maxlength='50' id="l_name" name='l_name' value='$l_name' /></td>
+      <td><label for="sl_name">Last Name: </label></td>
+      <td><input type='text' size="20" maxlength='50' id="sl_name" name='sl_name' value='$sl_name' /></td>
+      <td><label for="el_name">Last Name: </label></td>
+      <td><input type='text' size="20" maxlength='50' id="el_name" name='el_name' value='$el_name' /></td>
+    </tr>
+   <tr>
+    <td></td><td></td><td></td><td></td>
+    <td><label for="ephone"> Telephone </label></td>
+    <td><input type="text" size="15" maxlength="15" id="ephone" name="ephone" value="$ephone" /></td> 
+   </tr>
+ </table>
+ <table>
+  <tr>
+   <th colspan="2"> Children Names </th><th colspan="2"> Address </th> <th colspan="2">Subdivision</th>
+  </tr>
+  <tr>
+   <td><label for="sibling1">Child 1: </label></td>
+   <td><input type='text' size="15" maxlength='20' id='sibling1' name='sibling1' value='$sibling1' /></td>
+	 <td><label for="address1">Street Address: </label></td>
+	 <td><input type='text' maxlength='50' id="address1" name='address1' value='$address1' /></td>
+   <td><label for="pickup">Pick UP: </label></td>
+   <td>
 _END;
+?> 
+    <?php
+      $result = mysql_query("SELECT *
+                          FROM pickdrop") or die ("Issue selecting rows - " . mysql_error());
+      $row = mysql_num_rows($result);
+        echo "<select name='pick'>";
+        while ($line = mysql_fetch_assoc($result)) {
+        echo "<option value=' ".$line['id']." '>" .$line['pickdrop']."</option>";
+       }
+      echo "</select> ";
+    ?>  
+<?php
+echo <<<_END
+    </td>          
+   </tr>
+  <tr>
+		<td><label for="sibling2">Child 2: </label></td>
+  	<td><input type='text' size="15" maxlength='20' id='sibling2' name='sibling2' value='$sibling2' /></td>
+		<td><label for="address2">APT #/PO Box: </label></td>
+		<td><input type='text' maxlength='50' id="address2" name='address2' value='$address2' /></td>
+    <td><label for="dropoff">Drop Off: </label></td>
+    <td>
+_END;
+?>
+    <?php
+      $result = mysql_query("SELECT *
+                          FROM pickdrop") or die ("Issue selecting rows - " . mysql_error());
+      $row = mysql_num_rows($result);
+        echo "<select name='drop'>";
+        while ($line = mysql_fetch_assoc($result)) {
+        echo "<option value=' ".$line['id']." '>" .$line['pickdrop']."</option>";
+       }
+      echo "</select> "; ?>  
+    <?php
+echo <<<_END
+    </td>
+	</tr>
+  <tr>
+		<td><label for="sibling3">Child 3: </label></td>
+  	<td><input type='text' size="15" maxlength='20' id='sibling3' name='sibling3' value='$sibling3' /></td>
+		<td><label for="city">City: </label></td>
+		<td><input type='text' maxlength='50' id="city" name='city' value='$city' /></td>  
+  </tr>
+  <tr>
+  	<td><td></td></td>
+		<td><label for="state">State: </label></td>
+		<td><input type='text' size='2' maxlength='2' id='state' name='state' value='$state' /> 
+		<label for="zipcode">Zip: </label>
+		<input type='text' size='5' maxlength='5' id="zipcode" name='zipcode' value='$zipcode' /></td>    
+  </tr>
+  <table>
+  <tr>
+		<th colspan="2">Telephone</th><th colspan="2">EMail</th>  
+  </tr>
+  <tr>
+		<td><label for="thome">Home:</label></td>
+		<td><input type='text' size='15' maxlength='15' id='thome' name='thome' value='$thome' /></td>  
+		<td><label for="ehome">Home:</label></td>
+		<td><input type='text' size='35' maxlength='50' id='ehome' name='ehome' value='$ehome' /></td>  
+  </tr>
+  <tr>
+		<td><label for="twork">Work:</label></td>
+		<td><input type='text' size='15' maxlength='15' id='twork' name='twork' value='$twork' /></td>
+		<td><label for="ework">Work:</label></td>
+		<td><input type='text' size='35' maxlength='50' id='ework' name='ework' value='$ework' /></td>
+  </tr>
+  <tr>
+		<td><label for="cell">Cell:</label></td>
+		<td><input type='text' size='15' maxlength='15' id='cell' name='cell' value='$cell' /></td>  
+  </tr>
+  <tr>
+		<td><label for="fax">Fax:</label></td>
+		<td><input type='text' size='15' maxlength='15' id='fax' name='fax' value='$fax' /></td>  
+  </tr>
+ </table>
+ <table>
+  <th colspan="3">Customer Notes </th>
+  <tr>
+    <td><textarea id ='notes' name='notes' value='$notes' row = "5" cols = "60"> </textarea> </td>  
+  </tr>
+  </table>
+</table>
+<!-- </table> -->
+<input class="addbutton" type='submit' value='Add' />
+</form><br />
+_END;
+require_once 'footer.html';
 ?>
