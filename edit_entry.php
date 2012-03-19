@@ -1,7 +1,6 @@
 <?php
 require_once 'functions.php';
 require_once 'db_connect.php';
-
 session_start();
 $edit_id = $_SESSION['id'];
 
@@ -110,7 +109,21 @@ if ($_POST['twork']) $tele['twork'] = sanitizeMySQL($_POST['twork']);
                           WHERE master_id=$edit_id");
       if (!$result) die ("Database access failed: " . mysql_error());
   }
-// ************ End of EMail edit *********************
+  // ************ End of EMail edit *********************
+  // ************ Start of Notes edit *********************
+    $notes = sanitizeMySQL($_POST['notes']);
+    if (trim($notes) !== "") {
+    $query = "INSERT INTO notestext VALUES(NULL, '$edit_id','$notes')";
+    $results = mysql_query($query);
+    $notes_id = mysql_insert_id();
+      if (!$results) die ("Database access failed: " . mysql_error());
+    $query = "INSERT INTO notesdt (id, master_id, date, time)
+    VALUES ('$notes_id','$edit_id', NOW(), CURTIME() )";
+    $results = mysql_query($query);
+      if (!$results) die ("Database access failed: " . mysql_error());
+  }
+  
+// ************ End of Notes *********************
 
   session_start();
         $_SESSION['id'] = $edit_id;
@@ -139,6 +152,7 @@ Fax<input type='text' size='30' maxlength='25' name='tfax' value='$tele[fax]' />
 <p><strong>Email</strong></p>
 Home: <input type='text' size='30' maxlength='25' name='ehome' value='$email[home]' /><br />
 Work: <input type='text' size='30' maxlength='25' name='ework' value='$email[work]' /><br />
+<textarea id ='notes' name='notes' value='$notes' row = "5" cols = "60"> </textarea>
 <p></p>
 <input type='submit' value = 'Submit'>
 <br />
