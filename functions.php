@@ -39,7 +39,6 @@ while ($row = mysql_fetch_assoc($result)) {
       exit;
   }
 }
-echo "Function returned false<br />";
 return false;
 }
 ?>
