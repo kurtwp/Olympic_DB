@@ -1,6 +1,8 @@
 <?php
 require_once 'functions.php';
 require_once 'db_connect.php';
+require_once 'header.html';
+$notes = "";
 session_start();
 $edit_id = $_SESSION['id'];
 
@@ -88,20 +90,20 @@ if ($_POST['twork']) $tele['twork'] = sanitizeMySQL($_POST['twork']);
     if (!$result) die ("MySQL query access failed: " . mysql_error());
   }
 // ************ Start of EMail edit ********* 
-  if ($_POST['ehome'] || $_POST['ework']) {
+  if ($_POST['emhome'] || $_POST['emwork']) {
     $table="email";
     if (match_column($table, $edit_id)) {
-      $email['ehome'] = sanitizeMySQL($_POST['ehome']);
-      $email['ework'] = sanitizeMySQL($_POST['ework']);
+      $email['emhome'] = sanitizeMySQL($_POST['emhome']);
+      $email['emwork'] = sanitizeMySQL($_POST['emwork']);
       $result = mysql_query("UPDATE email
-                          SET home='$email[ehome]', work='$email[ework]'
+                          SET ehome='$email[emhome]', ework='$email[emwork]'
                           WHERE master_id=$edit_id");
       if (!$result) die ("Database access failed: " . mysql_error());
     } else {
-      $email['ehome'] = sanitizeMySQL($_POST['ehome']);
-      $email['ework'] = sanitizeMySQL($_POST['ework']);
-      $result = mysql_query("INSERT INTO email (master_id, home, work)
-                            VALUES ('$edit_id','$email[ehome]','$email[ework]')");
+      $email['emhome'] = sanitizeMySQL($_POST['emhome']);
+      $email['emwork'] = sanitizeMySQL($_POST['emwork']);
+      $result = mysql_query("INSERT INTO email (master_id, ehome, ework)
+                            VALUES ('$edit_id','$email[emhome]','$email[emwork]')");
       if (!$result) die ("MySQL query access failed: " . mysql_error());
     }
   } elseif (!$_POST['ehome'] && !$_POST['ework']) {
@@ -150,17 +152,13 @@ Home<input type='text' size='30' maxlength=,25' name='thome' value='$tele[home]'
 Cell<input type='text' size='30' maxlength='25' name='tcell' value='$tele[cell]' /><br />
 Fax<input type='text' size='30' maxlength='25' name='tfax' value='$tele[fax]' /><br />
 <p><strong>Email</strong></p>
-Home: <input type='text' size='30' maxlength='25' name='ehome' value='$email[home]' /><br />
-Work: <input type='text' size='30' maxlength='25' name='ework' value='$email[work]' /><br />
+Home: <input type='text' size='30' maxlength='25' name='emhome' value='$email[ehome]' /><br />
+Work: <input type='text' size='30' maxlength='25' name='emwork' value='$email[ework]' /><br />
 <textarea id ='notes' name='notes' value='$notes' row = "5" cols = "60"> </textarea>
 <p></p>
-<input type='submit' value = 'Submit'>
+<input class='updatebutton' type='submit' value = 'Update'>
 <br />
 </form>
-<ul>
-    <li><a href="add_entry.php">Add a Customer</a></li>
-    <li><a href="delete_entry.php">Delete a Customer</a></li>
-    <li><a href="search_entry.php">Search a Customer</a></li>
-</ul>
 _END;
+require_once 'footer.html';
 ?>
