@@ -1,6 +1,7 @@
 <?php
 require_once 'functions.php';
 require_once 'db_connect.php';
+require_once 'header.html';
 $search_name = "";
 $edit_id = 0;
 $home = "";
@@ -54,12 +55,8 @@ echo <<<_END
 <form action="search_entry.php" method="post">
 <p><strong>Search by Last name only</strong></p>
 Search <input type='text' size="20" maxlength='50' name='search_name' value='$search_name' /><br />
-<input type='submit' value='Search' />
+<input class="searchbutton" type='submit' value='Search' />
 </form>
-<ul>
-    <li><a href="add_entry.php">Add a Customer</a></li>
-    <li><a href="delete_entry.php">Delete a Customer</a></li>
-    <li><a href="search_entry.php">Search a Customer</a></li>
-</ul>
 _END;
+require_once 'footer.html';
 ?>
