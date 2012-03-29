@@ -48,11 +48,11 @@ mysql_select_db($db_database)
             sibling3 VARCHAR(32),
             PRIMARY KEY (id)
 		)"; */
-/* $query = "CREATE TABLE pickdrop (
+ $query = "CREATE TABLE pickdrop (
 			id INT NOT NULL AUTO_INCREMENT,
 			pickdrop VARCHAR(25),
             PRIMARY KEY (id)
-		)"; */ 
+		)"; 
 /* $query = "CREATE TABLE location (
 			id INT NOT NULL AUTO_INCREMENT,
             master_id INT NOT NULL,
@@ -66,13 +66,39 @@ mysql_select_db($db_database)
             notetext TEXT,
             PRIMARY KEY (id)
 		)"; */
-$query = "CREATE TABLE notesdt (
+/* $query = "CREATE TABLE notesdt (
           id INT NOT NULL,
           master_id INT NOT NULL,
           date DATE,
           time TIME
-          )";
-
+          )"; */
+/* $query = "CREATE TABLE ttype (
+			id INT NOT NULL AUTO_INCREMENT,
+			ttype VARCHAR(25),
+            PRIMARY KEY (id)
+		)"; */
+/* $query = "CREATE TABLE travel_type (
+			id INT NOT NULL AUTO_INCREMENT,
+            master_id INT NOT NULL,
+			travel_type INT,
+            PRIMARY KEY (id)
+		)"; */
+/* $query = "CREATE TABLE travel_days (
+			id INT NOT NULL AUTO_INCREMENT,
+            master_id INT NOT NULL,
+			m INT,
+            t INT,
+            w INT,
+            th INT,
+            f INT,
+            mf INT,
+            PRIMARY KEY (id)
+		)"; */
+/* $query = "CREATE TABLE daysofweek (
+			id INT NOT NULL AUTO_INCREMENT,
+			day CHAR(2),
+            PRIMARY KEY (id)
+		)"; */ 
 $result = mysql_query($query);
 if (!$result) die ("Database access failed: " . mysql_error());
 ?>

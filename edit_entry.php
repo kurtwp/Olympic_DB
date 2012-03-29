@@ -6,12 +6,12 @@ $notes = "";
 session_start();
 $edit_id = $_SESSION['id'];
 
-echo "Updating ";
+echo "<h1>Updating ";
 $get_name = mysql_query("SELECT *
                           FROM master_name
                           WHERE master_name.id=$edit_id") or die ("Issue selecting rows - " . mysql_error());
 $line = mysql_fetch_array($get_name);
-echo $line["f_name"] . " " . $line["L_name"] . "<br /> ";
+echo $line["f_name"] . " " . $line["L_name"] . "</h1><br /> ";
 // ****** Customer Address information ************
 $get_address = mysql_query("SELECT *
                            FROM address
@@ -33,7 +33,6 @@ $get_tele = mysql_query ("SELECT *
                                 FROM telephone
                                 WHERE telephone.master_id=$edit_id");
 $tele = mysql_fetch_array($get_tele);
-
 // ************ Start of Edit *************** 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
 // ************ Start of Address edit *******
@@ -68,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
       if (!$result) die ("Database access failed: " . mysql_error());
   } else {
     echo "IN INSERT <br />";
-    $result = mysql_query("INSERT INTO sibling (master_id, sibling1, sibling2, sibling3, subdivision)
+    $result = mysql_query("INSERT INTO sibling (master_id, sibling1, sibling2, sibling3)
                             VALUES ('$edit_id','$sib[esibling1]','$sib[esibling2]','$sib[esibling3]')");
       if (!$result) die ("MySQL query access failed: " . mysql_error());
   }
@@ -111,7 +110,18 @@ if ($_POST['twork']) $tele['twork'] = sanitizeMySQL($_POST['twork']);
                           WHERE master_id=$edit_id");
       if (!$result) die ("Database access failed: " . mysql_error());
   }
-  // ************ End of EMail edit *********************
+  // ************ End of EMail edit ***********************
+  // ************ Start of Location edit ******************
+  if ($_POST['picks']) $picks = sanitizeMySQL($_POST['picks']);
+  if ($_POST['drops']) $drops = sanitizeMySQL($_POST['drops']);
+  if (!empty($picks) || !empty($drops)) {
+    $query = ("UPDATE location
+    SET pickup='$picks', dropoff ='$drops'
+    WHERE master_id=$edit_id");
+    $results = mysql_query($query);
+    if (!$results) die ("Database access failed: " . mysql_error());
+  }
+  // ************ End of Location edit ********************  
   // ************ Start of Notes edit *********************
     $notes = sanitizeMySQL($_POST['notes']);
     if (trim($notes) !== "") {
@@ -154,11 +164,48 @@ Fax<input type='text' size='30' maxlength='25' name='tfax' value='$tele[fax]' />
 <p><strong>Email</strong></p>
 Home: <input type='text' size='30' maxlength='25' name='emhome' value='$email[ehome]' /><br />
 Work: <input type='text' size='30' maxlength='25' name='emwork' value='$email[ework]' /><br />
+_END;
+?>
+<?php
+  $table="location";
+if (match_column($table, $edit_id)){
+     $get_location = mysql_query("SELECT * FROM location WHERE location.master_id=$edit_id");
+     $line = mysql_fetch_array($get_location);
+     $pick=$line['pickup'];
+     $drop=$line['dropoff'];
+     $result = mysql_query("SELECT *
+                          FROM pickdrop") or die ("Issue selecting rows - " . mysql_error());
+     $row = mysql_num_rows($result);
+     echo "<select name='picks'>";
+     while ($line = mysql_fetch_assoc($result)) {
+       if ($pick != $line['id']) {
+        echo "<option value=' ".$line['id']." '>" .$line['pickdrop']."</option>";
+       } else {
+        echo "<option value=' ".$line['id']." 'selected>" .$line['pickdrop']."</option>";
+       }
+      }
+      echo "</select> ";
+      $result = mysql_query("SELECT *
+                      FROM pickdrop") or die ("Issue selecting rows - " . mysql_error());
+      $row = mysql_num_rows($result);
+      echo "<select name='drops'>";
+      while ($line = mysql_fetch_assoc($result)) {
+        if ($drop != $line['id']) {
+          echo "<option value=' ".$line['id']." ' >" .$line['pickdrop']."</option>";
+        }  else {
+          echo "<option value='".$line['id']." 'selected>" .$line['pickdrop']."</option>";
+        }
+      }
+      echo "</select> <br />";
+      }
+echo <<<_END
 <textarea id ='notes' name='notes' value='$notes' row = "5" cols = "60"> </textarea>
 <p></p>
 <input class='updatebutton' type='submit' value = 'Update'>
 <br />
 </form>
 _END;
+?>
+<?php
 require_once 'footer.html';
 ?>

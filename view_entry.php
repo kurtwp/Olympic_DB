@@ -8,7 +8,6 @@ $table = "";
 
 session_start();
 $id = $_SESSION['id'];
-
 $get_name = mysql_query("SELECT * FROM master_name t1
                         LEFT JOIN email t2 ON t1.id = t2.master_id
                         LEFT JOIN address t3 ON t1.id = t3.master_id
@@ -17,7 +16,6 @@ $get_name = mysql_query("SELECT * FROM master_name t1
                         WHERE t1.id = $id") or die ("Issue selecting rows - " . mysql_error());                
 $line = mysql_fetch_assoc($get_name);
         echo $line["f_name"] . " " . $line["L_name"] . "<br /> ";
-        echo $line["ehome"] . " " . $line["ework"] . "<br />";
         echo $line["address1"] . " " . $line["address2"] . "<br /> ";
         echo $line["city"] . " " . $line["state"] . " " . $line["zipcode"] ."<br />";
         echo $line["sibling1"] . " " . $line["sibling2"] . " " . $line["sibling3"] . "<br />";
@@ -25,6 +23,7 @@ $line = mysql_fetch_assoc($get_name);
         echo "WORK : " . $line['work'] . "<br /> ";
         echo "CELL : " . $line['cell'] . "<br /> ";
         echo " FAX  : " . $line['fax'] . "<br />";
+        echo $line["ehome"] . " " . $line["ework"] . "<br />";
         $table = "location";
       if (match_column($table, $id)){
         $get_location = mysql_query("SELECT * FROM location WHERE location.master_id=$id");
@@ -35,6 +34,15 @@ $line = mysql_fetch_assoc($get_name);
         $get_pickdrop = mysql_query("SELECT * FROM pickdrop WHERE pickdrop.id=$line[dropoff]");
         $lines = mysql_fetch_array($get_pickdrop);
         echo "Drop Off :" . $lines['pickdrop'] . "<br />";
+        echo "<p></p>";
+      }
+      $table = "travel_type";
+      if (match_column($table, $id)){
+        $get_travel_type = mysql_query("SELECT * FROM travel_type WHERE travel_type.master_id=$id");
+        $line = mysql_fetch_array($get_travel_type);
+        $get_ttype = mysql_query("SELECT * FROM ttype WHERE ttype.id=$line[travel_type]");
+        $lines = mysql_fetch_array($get_ttype);
+        echo "Type of Travel :" . $lines['ttype'] . "<br />";
         echo "<p></p>";
       }
       $get_notes = mysql_query("SELECT * FROM notestext, notesdt
@@ -48,7 +56,8 @@ $line = mysql_fetch_assoc($get_name);
         echo "</p>";
       }
       echo "Do you want to EDIT this record<br />";
-	  echo "<a href=" . $_SERVER['PHP_SELF'] . "?id=" . $id . "&mode=edit>EDIT</a>";
+	  echo "<a href=" . $_SERVER['PHP_SELF'] . "?id=" . $id . "&mode=edit>EDIT</a> ";
+      echo "<a href=" . $_SERVER['PHP_SELF'] . "?id=" . $id . "&mode=delete>DELETE</a>";
       // End if view
 // Redirected to edit_entry.php to edit/update customer information
   if (!isset($_GET['mode'])) {
@@ -61,6 +70,12 @@ $line = mysql_fetch_assoc($get_name);
         session_start();
         $_SESSION['id'] = $id;
         header('Location: edit_entry.php');
+        exit;
+  }// End if edit*/
+  if ($mode == "delete") {
+        session_start();
+        $_SESSION['id'] = $id;
+        header('Location: delete_entry.php');
         exit;
   }// End if edit*/
 echo <<<_END
